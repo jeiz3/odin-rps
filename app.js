@@ -1,9 +1,8 @@
 "use strict";
 
-const HANDS = ['rock', 'paper', 'scissors'];
-
 const getComputerHand = () => {
-    let i = Math.floor(Math.random() * HANDS.length);
+    const HANDS = ['rock', 'paper', 'scissors'];
+    const i = Math.floor(Math.random() * HANDS.length);
     return HANDS[i];
 }
 
@@ -13,19 +12,51 @@ const compareHands = (computer, player) => {
         'paper:scissors', 
         'scissors:rock'
     ];
-    if ((computer === player) || (!HANDS.includes(player))) {
-        return "none, draw / error";
-    }
-
-    const WINNER = PLAYER_WINNING_COMBINATIONS.includes(`${computer}:${player}`);
-    return WINNER ? 'player' : 'computer';
+    if (computer === player) return;
+    const isPlayerWinRound = PLAYER_WINNING_COMBINATIONS.includes(`${computer}:${player}`); 
+    return isPlayerWinRound ? playerScore++ : computerScore++;
 }
 
-const computerHand = getComputerHand();
-let playerHand =  (prompt("Your turn is: ", '')).toLowerCase();
+const displayResult = (computerHand, playerHand) => {
+    const result = displayContainer.querySelectorAll('.fill-data')
+    const GAME_DATA = [computerHand, playerHand, computerScore, playerScore];
+    
+    GAME_DATA.forEach((data, i) => {
+        let textNode = document.createTextNode(data);
+        result[i].textContent = '';
+        result[i].appendChild(textNode);
+    });
+}
 
-const outcome = `Computer: ${computerHand}\nWinner: `;
+const endGame = () => {
+    uiContainer.forEach((button) => {
+        button.disabled = true;
+    });
+    const gameWinner = (computerScore > playerScore) ? 'Computer' : 'Player';
+    displayContainer.append(gameWinner.concat(' wins! Reload page to play again.'))
+};
 
-console.log(outcome.concat(compareHands(computerHand, playerHand)));
+const playGame = () => {
+    const computerHand = getComputerHand();
+    compareHands(computerHand, playerHand);
+    if (computerScore === NUMBER_OF_ROUNDS || playerScore === NUMBER_OF_ROUNDS) {
+        endGame();
+    }
+    displayResult(computerHand, playerHand);
+}
 
+const uiContainer = document.querySelectorAll('button');
+const displayContainer = document.querySelector('.display-container');
+const NUMBER_OF_ROUNDS = 5;
+
+let computerScore = 0;
+let playerScore = 0;
+let playerHand = '';
+
+uiContainer.forEach((button) => {
+    button.addEventListener('click', () => {
+        playerHand = button.id;
+        playGame();
+    });
+});
 
